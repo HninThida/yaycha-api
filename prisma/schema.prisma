@@ -1,0 +1,94 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int           @id @default(autoincrement())
+  name        String
+  username    String        @unique
+  bio         String?
+  password    String
+  posts       Post[]
+  comments    Comment[]
+  created     DateTime      @default(now())
+  PostLike    PostLike[]
+  commentLike CommentLike[]
+  followers   Follow[]      @relation("followers")
+  following   Follow[]      @relation("following")
+  Follow      Follow[]
+  notis       Noti[]
+}
+
+model Post {
+  id          Int           @id @default(autoincrement())
+  content     String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      Int
+  comments    Comment[]
+  created     DateTime      @default(now())
+  postLike    PostLike[]
+  notis       Noti[]
+  commentLike CommentLike[]
+}
+
+model Comment {
+  id          Int           @id @default(autoincrement())
+  content     String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      Int
+  post        Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId      Int
+  created     DateTime      @default(now())
+  commentLike CommentLike[]
+}
+
+model PostLike {
+  id      Int      @id @default(autoincrement())
+  post    Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId  Int
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  Int
+  created DateTime @default(now())
+}
+
+model CommentLike {
+  id        Int      @id @default(autoincrement())
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  commentId Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  created   DateTime @default(now())
+  Post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    Int?
+}
+
+model Noti {
+  id      Int      @id @default(autoincrement())
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  Int
+  type    String
+  content String
+  created DateTime @default(now())
+  Post    Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId  Int?
+  read    Boolean  @default(false)
+}
+
+model Follow {
+  id          Int      @id @default(autoincrement())
+  follower    User     @relation("followers", fields: [followerId], references: [id], onDelete: Cascade)
+  followerId  Int
+  following   User     @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+  followingId Int
+  created     DateTime @default(now())
+  User        User?    @relation(fields: [userId], references: [id])
+  userId      Int?
+}
