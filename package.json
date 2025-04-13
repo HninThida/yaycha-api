@@ -13,5 +13,9 @@
   },
   "prisma": {
     "seed": "node prisma/seeds/main.js"
-  }
+  },
+  "scripts": {
+  "start": "node index.js",
+  "dev": "nodemon index.js"
+}
 }
